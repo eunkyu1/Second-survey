@@ -3,123 +3,413 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Anxiety Lab — 스프레드시트 연결 점검</title>
+<title>불안 연구: 뉴스 헤드라인 실험 (사진 포함·연결 점검)</title>
 <meta name="theme-color" content="#1f4aff">
 <style>
-:root{--bg:#0b1020;--card:#111832;--muted:#93a1c8;--text:#e7ecff;--accent:#1f4aff;--ok:#3bd671;--fail:#ff6961}
-*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif}
-.container{max-width:860px;margin:36px auto;padding:0 18px}
-.card{background:linear-gradient(180deg,#101737,#0d1330);border:1px solid #243063;border-radius:16px;padding:22px;margin:18px 0}
-h1{margin:0 0 12px} .subtitle{color:var(--muted)} .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
-.btn.ghost{background:transparent;color:var(--accent)}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #2a3567;background:#0e1633;color:var(--muted);margin-left:8px}
+:root{--bg:#0b1020;--card:#111832;--muted:#93a1c8;--text:#e7ecff;--accent:#1f4aff;--accent-2:#6ea3ff;--ok:#3bd671;--fail:#ff6961}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif}
+.container{max-width:980px;margin:28px auto;padding:0 18px}
+.header{display:flex;align-items:center;gap:14px;padding:18px 18px 0}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800}
+.brand{font-size:20px;font-weight:700}
+.subtitle{color:var(--muted);margin:4px 0 0}
+.card{background:linear-gradient(180deg,#101737,#0d1330);border:1px solid #243063;border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 10px 30px rgba(10,20,60,.35)}
+h1,h2{margin:0 0 10px} h2{font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+label{display:block;margin:10px 0}
+input[type=text],select,textarea{width:100%;padding:12px;border:1px solid #2a3567;border-radius:10px;background:#0e1633;color:var(--text)}
+.btn{display:inline-block;padding:11px 16px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
+.btn.secondary{background:transparent;color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--text);border-color:#2a3567}
+.btn.disabled{opacity:.5;pointer-events:none}
+.actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.progress{height:10px;background:#0f1a3b;border-radius:8px;overflow:hidden;margin-bottom:12px;border:1px solid #223064}
+.progbar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s}
+.hidden{display:none}
+.news-image{width:100%;max-height:280px;object-fit:cover;border-radius:12px;border:1px solid #243063;margin:6px 0 10px}
+.lede{color:var(--muted)}
+.qa{margin-top:10px}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.hint{color:var(--muted);font-size:12px;margin-top:8px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;border:1px solid #2a3567;background:#0e1633;color:var(--muted)}
 .badge.ok{color:#c9ffe0;border-color:var(--ok);background:#0f2a1d}
-.badge.err{color:#ffe1df;border-color:var(--fail);background:#2a1010}
-pre{white-space:pre-wrap;background:#0e1633;border:1px solid #243063;border-radius:12px;padding:12px;max-height:320px;overflow:auto}
-small{color:var(--muted)}
+.badge.fail{color:#ffe1df;border-color:var(--fail);background:#2a1010}
+footer{padding:20px;color:var(--muted);text-align:center}
+#policyBtns .active{outline:2px solid var(--accent)}
+#summary table{width:100%;border-collapse:collapse}
+#summary th,#summary td{border:1px solid #223064;padding:8px;text-align:left}
+.small{font-size:12px;color:var(--muted)}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.compare-card{border:1px solid #243063;border-radius:12px;padding:12px;background:#0f1635}
 </style>
 </head>
 <body>
+  <div class="header container">
+    <div class="logo">AL</div>
+    <div>
+      <div class="brand">Anxiety Lab</div>
+      <div class="subtitle">뉴스 헤드라인 × 불안 × 정책 태도</div>
+    </div>
+  </div>
+
   <main class="container">
-    <section class="card">
-      <h1>스프레드시트 연결 점검</h1>
-      <p class="subtitle">아래 두 단계로 확인: ① 웹앱 헬스체크(GET) → ② PING 전송(POST)</p>
-      <div class="row">
-        <button id="btnHealth" class="btn">① 헬스체크(GET)</button>
-        <span id="healthState" class="badge">대기</span>
+    <section id="screen-intro" class="card">
+      <h1>참여 안내</h1>
+      <p class="subtitle">
+        이 조사는 <strong>동일한 사건</strong>을 <strong>서로 다른 표현</strong>으로 보도했을 때,
+        기사 표현이 독자의 <strong>불안감</strong>과 <strong>정책 의견</strong>에 어떤 영향을 주는지 알아보기 위해 진행됩니다.
+      </p>
+      <ul class="small">
+        <li>일부 라운드에서는 <strong>중립 기사</strong>, 일부 라운드에서는 <strong>불안 프레임 기사</strong>가 무작위로 제시됩니다.</li>
+        <li>응답은 익명으로 처리되며, 연구·교육 목적으로만 사용됩니다.</li>
+      </ul>
+      <div class="grid">
+        <label>닉네임(선택)
+          <input type="text" id="nickname" placeholder="익명 가능">
+        </label>
+        <label>관심 트랙
+          <select id="track">
+            <option value="media">정책·언론</option>
+            <option value="psych">심리</option>
+            <option value="law">법학</option>
+          </select>
+        </label>
       </div>
-      <div class="row">
-        <button id="btnPing" class="btn ghost">② PING 전송(POST)</button>
-        <span id="pingState" class="badge">대기</span>
+      <div class="actions">
+        <button id="btnStart" class="btn">시작하기</button>
+        <button id="btnPing" class="btn ghost">연결 테스트</button>
+        <span id="onlineState" class="badge">전송 준비</span>
       </div>
-      <p style="margin-top:10px"><small>둘 다 성공하면 본 게임 HTML을 올리면 된다. 실패면 아래 결과를 참고해 Apps Script 설정을 점검하자.</small></p>
+      <p class="small">※ “연결 테스트”를 누르면 스프레드시트에 테스트 행이 1줄 기록됩니다.</p>
     </section>
 
-    <section class="card">
-      <h2>응답 상세</h2>
-      <pre id="log">여기에 결과가 표시된다.</pre>
+    <section id="screen-trial" class="card hidden">
+      <div class="progress"><div id="progBar" class="progbar"></div></div>
+      <h2 id="headline"></h2>
+      <img id="image" class="news-image" alt="" />
+      <p id="lede" class="lede"></p>
+
+      <div class="qa">
+        <label>지금 느끼는 불안 정도 (1=전혀 아님 ~ 5=매우 큼)
+          <input type="range" id="anxiety" min="1" max="5" step="1" value="3">
+          <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+        </label>
+        <label>다음 정책에 대한 태도: <em id="policy"></em>
+          <div class="actions" id="policyBtns">
+            <button data-v="찬성" class="btn secondary">찬성</button>
+            <button data-v="반대" class="btn secondary">반대</button>
+            <button data-v="모름" class="btn ghost">모름</button>
+          </div>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="btnNext" class="btn disabled">다음</button>
+        <span id="sendState" class="badge">전송 대기</span>
+      </div>
+      <p class="hint">숫자키 1~5로 불안도 조절 가능</p>
+    </section>
+
+    <section id="screen-compare" class="card hidden">
+      <div class="progress"><div id="progBar2" class="progbar"></div></div>
+      <h2>어느 기사가 더 불안하게 느껴지나요?</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h3 id="cmpA_title"></h3>
+          <p id="cmpA_lede" class="lede"></p>
+          <button id="btnChooseA" class="btn secondary">A 선택</button>
+        </div>
+        <div class="compare-card">
+          <h3 id="cmpB_title"></h3>
+          <p id="cmpB_lede" class="lede"></p>
+          <button id="btnChooseB" class="btn secondary">B 선택</button>
+        </div>
+      </div>
+      <div class="qa">
+        <label>전체적으로 느낀 불안 정도 (1~5)
+          <input type="range" id="cmp_anxiety" min="1" max="5" step="1" value="3">
+          <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="btnCompareNext" class="btn disabled">완료</button>
+        <span id="sendState2" class="badge">전송 대기</span>
+      </div>
+    </section>
+
+    <section id="screen-finish" class="card hidden">
+      <h2>완료!</h2>
+      <p class="subtitle">참여 고마워요. 아래 요약을 확인하거나 로컬 CSV로 내보낼 수 있습니다.</p>
+      <div id="summary"></div>
+      <div class="actions">
+        <button id="btnReplay" class="btn">다시 하기</button>
+        <button id="btnExport" class="btn secondary">CSV 다운로드</button>
+        <button id="btnClear" class="btn ghost">데이터 초기화</button>
+        <button id="btnResend" class="btn ghost">미전송 재전송</button>
+      </div>
     </section>
   </main>
 
-<script>
-// 엔드포인트(네가 준 새 주소)
-const ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ5sSESrUxTEa5fV6RHlLm5pGapr0oRhdkH_cVYeGjDyhER0qtBOjSFdK-CG-SVmc6Yw/exec";
+  <footer><small>© Anxiety Lab — 학생 주도 연구</small></footer>
 
-const $ = (id)=>document.getElementById(id);
-const log = (msg, append=true)=>{
-  const box = $('log');
-  box.textContent = append ? (box.textContent + "\n" + msg) : msg;
+<script>
+// ===== 엔드포인트 (최신) =====
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ5sSESrUxTEa5fV6RHlLm5pGapr0oRhdkH_cVYeGjDyhER0qtBOjSFdK-CG-SVmc6Yw/exec";
+const TOKEN = "";
+
+// ===== 사진(테마별 Unsplash 소스) =====
+const IMAGES = {
+  gangnam_dropout: "https://source.unsplash.com/1200x700/?classroom,study",
+  nk_claim: "https://source.unsplash.com/1200x700/?geneva,conference",
+  school_drugs: "https://source.unsplash.com/1200x700/?police,school",
+  pattaya_drum: "https://source.unsplash.com/1200x700/?thailand,police",
+  seocheon_murder: "https://source.unsplash.com/1200x700/?police,tape",
+  busan_chem: "https://source.unsplash.com/1200x700/?hazmat,chemical",
+  yellow_envelope: "https://source.unsplash.com/1200x700/?protest,workers"
 };
 
-async function healthcheck(){
-  $('healthState').textContent = '요청 중…';
-  $('healthState').className = 'badge';
-  log('--- 헬스체크(GET) 시작 ---\nURL: ' + ENDPOINT, false);
-  try{
-    const res = await fetch(ENDPOINT, { method: 'GET', cache: 'no-store' });
-    const text = await res.text();
-    log(`HTTP ${res.status}\n${text}`);
-    if(res.ok && /READY/i.test(text)){
-      $('healthState').textContent = '헬스체크 성공(READY)';
-      $('healthState').className = 'badge ok';
-    }else{
-      $('healthState').textContent = '헬스체크 실패';
-      $('healthState').className = 'badge err';
-    }
-  }catch(e){
-    $('healthState').textContent = '헬스체크 오류';
-    $('healthState').className = 'badge err';
-    log('에러: ' + (e.message || e));
-  }
+// ===== 기사 데이터 (7개 사건 + 비교 1세트) =====
+const SINGLE_ITEMS = [
+  { id:"gangnam_dropout", topic:"교육/학업중단",
+    neutral:{ title:"강남3구 일반고 학업중단율, 서울에서 가장 높아", lede:"최근 통계에 따르면 강남3구 일반고의 학업중단율이 서울 평균보다 높은 것으로 나타났다. 자퇴 후 검정고시나 수능 준비를 선택하는 사례가 많았다.", img:IMAGES.gangnam_dropout, policy:"학업중단 예방을 위해 자퇴 심사 기준을 강화해야 한다." },
+    fear:{ title:"강남3구 일반고, 학생들 줄줄이 자퇴…서울 최고 학업중단율", lede:"명문 학군으로 알려진 강남3구에서 학업을 중단하는 학생이 급증해 서울 최고 수준에 달했다. ‘미래를 버린 선택’이라는 우려가 커지고 있다.", img:IMAGES.gangnam_dropout, policy:"학업중단 예방을 위해 자퇴 심사 기준을 강화해야 한다." } },
+  { id:"nk_claim", topic:"안보/국제",
+    neutral:{ title:"北 인민회의 의장, 스위스서 한미 핵전쟁 준비 주장", lede:"북한 최태복 최고인민회의 의장이 스위스 제네바 회의에서 한국과 미국이 핵전쟁을 준비하고 있다고 발언했다.", img:IMAGES.nk_claim, policy:"북한의 군사 도발 가능성에 대비해 한미 군사훈련을 확대해야 한다." },
+    fear:{ title:"北, “韓·美 핵전쟁 준비 중”…국제회의서 긴장 고조", lede:"북한 고위급 인사가 국제사회 앞에서 한국과 미국이 핵전쟁을 준비 중이라고 주장해 한반도 위기론이 재점화되고 있다.", img:IMAGES.nk_claim, policy:"북한의 군사 도발 가능성에 대비해 한미 군사훈련을 확대해야 한다." } },
+  { id:"school_drugs", topic:"치안/마약",
+    neutral:{ title:"강남 초등학교 앞서 이상 행동 보인 남성, 마약 투약 확인", lede:"경찰이 강남의 한 초등학교 앞에서 수상한 행동을 하던 남성을 검거한 결과 마약 투약 사실이 확인됐다.", img:IMAGES.school_drugs, policy:"학교 주변에 대한 마약 전수검사를 강화해야 한다." },
+    fear:{ title:"초등학교 앞 마약범 활보…학부모 불안 확산", lede:"강남 한 초등학교 앞에서 마약에 취한 남성이 배회하다가 경찰에 붙잡혔다. ‘아이들 안전이 위협받는다’는 우려가 커지고 있다.", img:IMAGES.school_drugs, policy:"학교 주변에 대한 마약 전수검사를 강화해야 한다." } },
+  { id:"pattaya_drum", topic:"해외/범죄",
+    neutral:{ title:"파타야 살인사건 공범, 현지 경찰 추적 끝에 최후", lede:"태국 파타야에서 발생한 드럼통 살인사건의 공범이 현지 경찰 추적 끝에 사망한 것으로 전해졌다.", img:IMAGES.pattaya_drum, policy:"해외 여행 시 자국민 보호를 위해 현지 경찰과의 공조를 확대해야 한다." },
+    fear:{ title:"“술 취한 한국인 태워…” 파타야 드럼통 살인 공범, 비극적 최후", lede:"태국 파타야에서 한국인 피해자가 드럼통에 유기된 사건의 공범이 도주 끝에 숨졌다. 잔혹한 범행 수법이 다시 도마에 올랐다.", img:IMAGES.pattaya_drum, policy:"해외 여행 시 자국민 보호를 위해 현지 경찰과의 공조를 확대해야 한다." } },
+  { id:"seocheon_murder", topic:"묻지마 범죄",
+    neutral:{ title:"서천서 지적장애인 피의자, 무작위 살인 혐의로 체포", lede:"충남 서천에서 30대 지적장애인이 길거리를 배회하다가 무작위로 행인을 공격해 살해한 혐의로 경찰에 체포됐다.", img:IMAGES.seocheon_murder, policy:"흉악 범죄 예방을 위해 고위험군의 외부 활동을 제한해야 한다." },
+    fear:{ title:"“누구든 노렸다”…서천 묻지마 살인, 1시간 배회 끝 범행", lede:"충남 서천에서 30대 지적장애인이 1시간 넘게 범행 대상을 물색하다가 행인을 살해했다. 주민 불안이 커지고 있다.", img:IMAGES.seocheon_murder, policy:"흉악 범죄 예방을 위해 고위험군의 외부 활동을 제한해야 한다." } },
+  { id:"busan_chem", topic:"재난/안전",
+    neutral:{ title:"부산 강변대로 유해화학물질 유출, 2명 부상", lede:"부산 강변대로에서 유해화학물질이 유출돼 도로 관리원 2명이 부상을 입었다. 관계 당국이 유출 경위를 조사 중이다.", img:IMAGES.busan_chem, policy:"화학물질 운반 차량에 대한 안전 점검을 의무화해야 한다." },
+    fear:{ title:"부산 도심 유해물질 유출…시민 안전 ‘비상’", lede:"부산 강변대로에서 유해화학물질이 대량 유출돼 2명이 다쳤다. 추가 피해에 대한 우려가 커지고 있다.", img:IMAGES.busan_chem, policy:"화학물질 운반 차량에 대한 안전 점검을 의무화해야 한다." } },
+  { id:"yellow_envelope", topic:"정책/노동",
+    neutral:{ title:"‘노란 봉투법’ 국회 통과…하청·특수고용 노조 활동 확대", lede:"국회가 하청·특수고용 노동자가 원청을 상대로 노조 활동을 할 수 있도록 하는 내용을 담은 법안을 의결했다.", img:IMAGES.yellow_envelope, policy:"하청·특수고용 노동자에게 원청 상대 노조 활동을 허용해야 한다." },
+    fear:{ title:"노란 봉투법 통과…기업 경영 부담·경제 악영향 우려", lede:"노조 권한 강화로 기업 활동 위축이 우려된다는 지적이 나온다.", img:IMAGES.yellow_envelope, policy:"하청·특수고용 노동자에게 원청 상대 노조 활동을 허용해야 한다." } },
+];
+
+const COMPARE_ITEM = { id:"disease_compare", topic:"비교/전염병",
+  A: { title:"중국서 또 시작된 ‘이 전염병’의 무서운 경고…전세계로 확산 중", lede:"중국에서 발생한 전염병에 대해 전세계 확산 가능성이 제기됐다." },
+  B: { title:"또 중국에서 심각한 전염, 치료제도 없다는데…전세계 비상", lede:"중국발 전염병이 심각하며 치료제 부재로 전세계 비상이 걸렸다는 보도다." }
+};
+
+const TOTAL_SINGLE = SINGLE_ITEMS.length; // 7
+const TOTAL = TOTAL_SINGLE + 1; // +1 compare
+
+// ===== 유틸 =====
+const $ = (id)=>document.getElementById(id);
+const shuffle = (arr)=>arr.sort(()=>Math.random()-0.5);
+const download = (filename, text)=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+};
+const toCSV = (rows)=>{
+  if(!rows.length) return '';
+  const cols=Object.keys(rows[0]);
+  const head=cols.join(',');
+  const body=rows.map(r=>cols.map(c=>`"${String(r[c]??'').replaceAll('"','""')}"`).join(',')).join('\n');
+  return head+'\n'+body;
+};
+
+// ===== 상태 =====
+let sequence = []; // 라운드 순서: 0..6 for singles, 'C' for compare
+let idx = 0;
+let startTime = 0;
+let currentPolicyChoice = null;
+const LS_KEY = 'al_records_random_photo_v2';
+const LS_UNSENT = 'al_unsent_random_photo_v2';
+let saved = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
+let unsent = JSON.parse(localStorage.getItem(LS_UNSENT)||'[]');
+
+// ===== 전송 =====
+async function postRows(rows){
+  const payload = { token:TOKEN, rows };
+  const res = await fetch(ENDPOINT, {
+    method:'POST',
+    // 헤더를 지정하지 않아 프리플라이트(OPTIONS)를 회피
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.text();
+}
+async function flushUnsent(){
+  if(!unsent.length) return true;
+  $('onlineState').textContent = `미전송 ${unsent.length}건 전송 중…`;
+  try{ await postRows(unsent); unsent=[]; localStorage.setItem(LS_UNSENT, JSON.stringify(unsent)); $('onlineState').textContent='온라인 전송 정상'; $('onlineState').className='badge ok'; return true; }
+  catch(e){ $('onlineState').textContent='전송 실패(보관 중)'; $('onlineState').className='badge fail'; return false; }
 }
 
+// ===== 초기화 =====
+window.addEventListener('DOMContentLoaded', () => {
+  $('btnStart').addEventListener('click', start);
+  $('btnPing').addEventListener('click', sendPing);
+  $('btnNext').addEventListener('click', nextSingle);
+  $('btnCompareNext').addEventListener('click', nextCompare);
+  $('btnReplay').addEventListener('click', () => location.reload());
+  $('btnExport').addEventListener('click', () => download('anxiety_lab_records.csv', toCSV(saved)));
+  $('btnClear').addEventListener('click', () => { if(confirm('기기에 저장된 데이터를 모두 삭제할까요?')){ saved=[]; unsent=[]; localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_UNSENT); alert('삭제 완료'); } });
+  $('btnResend').addEventListener('click', flushUnsent);
+
+  window.addEventListener('keydown', (e)=>{ if(['1','2','3','4','5'].includes(e.key)) $('anxiety').value=e.key; });
+  document.querySelectorAll('#policyBtns button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      currentPolicyChoice=btn.dataset.v;
+      document.querySelectorAll('#policyBtns button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); $('btnNext').classList.remove('disabled');
+    });
+  });
+
+  // Compare selections
+  const setChoice = (v)=>{ $('btnCompareNext').classList.remove('disabled'); $('btnCompareNext').dataset.choice=v; };
+  $('btnChooseA').addEventListener('click', ()=>setChoice('A'));
+  $('btnChooseB').addEventListener('click', ()=>setChoice('B'));
+
+  if(unsent.length){ $('onlineState').textContent=`미전송 ${unsent.length}건 보관 중`; $('onlineState').className='badge fail'; }
+});
+
+// ===== 연결 테스트 =====
 async function sendPing(){
-  $('pingState').textContent = '전송 중…';
-  $('pingState').className = 'badge';
-  log('\n--- PING 전송(POST) 시작 ---\nURL: ' + ENDPOINT);
   const row = {
     timestamp: new Date().toISOString(),
-    nickname: 'PING',
-    track: 'media',
-    trial_index: 0,
-    item_id: 'ping',
-    topic: 'ping',
-    variant: 'ping',
-    title: 'PING TEST',
-    policy_prompt: 'PING',
-    anxiety_1to5: 0,
-    policy_attitude: 'PING',
-    rt_ms: 0
+    nickname: 'PING', track: 'media', trial_index: 0,
+    item_id: 'ping', topic: 'ping', variant: 'ping',
+    title: 'PING TEST', policy_prompt: 'PING',
+    anxiety_1to5: 0, policy_attitude: 'PING', rt_ms: 0
   };
-  try{
-    const res = await fetch(ENDPOINT, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ token:'', rows:[row] })
-    });
-    const text = await res.text();
-    log(`HTTP ${res.status}\n${text}`);
-    if(res.ok && /OK|success/i.test(text)){
-      $('pingState').textContent = '연결 정상(PING 기록됨)';
-      $('pingState').className = 'badge ok';
-    }else{
-      $('pingState').textContent = '전송 실패(본문 확인)';
-      $('pingState').className = 'badge err';
-    }
-  }catch(e){
-    $('pingState').textContent = '전송 오류';
-    $('pingState').className = 'badge err';
-    log('에러: ' + (e.message || e));
-  }
+  $('onlineState').textContent='테스트 전송 중…'; $('onlineState').className='badge';
+  try{ await postRows([row]); $('onlineState').textContent='연결 정상(PING 기록됨)'; $('onlineState').className='badge ok'; }
+  catch(e){ $('onlineState').textContent='연결 실패(설정 확인 필요)'; $('onlineState').className='badge fail'; }
 }
 
-$('btnHealth').addEventListener('click', healthcheck);
-$('btnPing').addEventListener('click', sendPing);
+function start(){
+  sequence = Array.from({length: TOTAL_SINGLE}, (_,i)=>i);
+  sequence = shuffle(sequence);
+  sequence.push('C'); // compare last
+  idx = 0;
+  $('screen-intro').classList.add('hidden');
+  renderCurrent();
+  flushUnsent();
+}
 
-// 페이지 진입 시 엔드포인트 문자열도 로그에 표시
-log('ENDPOINT = ' + ENDPOINT);
+function renderCurrent(){
+  const cur = sequence[idx];
+  const progress = Math.floor((idx/TOTAL)*100);
+  if(cur==='C') {
+    $('screen-trial').classList.add('hidden');
+    $('screen-compare').classList.remove('hidden');
+    $('progBar2').style.width = progress+'%';
+    $('cmpA_title').textContent = COMPARE_ITEM.A.title;
+    $('cmpA_lede').textContent  = COMPARE_ITEM.A.lede;
+    $('cmpB_title').textContent = COMPARE_ITEM.B.title;
+    $('cmpB_lede').textContent  = COMPARE_ITEM.B.lede;
+    $('cmp_anxiety').value = 3;
+    $('btnCompareNext').classList.add('disabled');
+    $('sendState2').textContent='전송 대기'; $('sendState2').className='badge';
+    return;
+  }
+  // single trial
+  $('screen-compare').classList.add('hidden');
+  $('screen-trial').classList.remove('hidden');
+  const item = SINGLE_ITEMS[cur];
+  const variant = Math.random()<0.5 ? 'neutral' : 'fear';
+  const v = item[variant];
+  $('headline').textContent = v.title;
+  $('lede').textContent = v.lede;
+  $('image').src = v.img;
+  $('policy').textContent = v.policy;
+  $('anxiety').value = 3;
+  currentPolicyChoice = null;
+  document.querySelectorAll('#policyBtns button').forEach(b=>b.classList.remove('active'));
+  $('btnNext').classList.add('disabled');
+  $('progBar').style.width = progress+'%';
+  $('sendState').textContent='전송 대기'; $('sendState').className='badge';
+  startTime = performance.now();
+  $('screen-trial').dataset.item_id = item.id;
+  $('screen-trial').dataset.topic = item.topic;
+  $('screen-trial').dataset.variant = variant;
+  $('screen-trial').dataset.title = v.title;
+  $('screen-trial').dataset.policy = v.policy;
+}
+
+async function nextSingle(){
+  if($('btnNext').classList.contains('disabled')) return;
+  const ms = Math.round(performance.now()-startTime);
+  const row = {
+    timestamp: new Date().toISOString(),
+    nickname: $('nickname').value.trim(),
+    track: $('track').value,
+    trial_index: idx+1,
+    item_id: $('screen-trial').dataset.item_id,
+    topic: $('screen-trial').dataset.topic,
+    variant: $('screen-trial').dataset.variant,
+    title: $('screen-trial').dataset.title,
+    policy_prompt: $('screen-trial').dataset.policy,
+    anxiety_1to5: Number($('anxiety').value),
+    policy_attitude: currentPolicyChoice,
+    rt_ms: ms
+  };
+  saved.push(row); localStorage.setItem(LS_KEY, JSON.stringify(saved));
+  $('sendState').textContent='전송 중…';
+  try{ await postRows([row]); $('sendState').textContent='전송 성공'; $('sendState').className='badge ok'; }
+  catch(e){ unsent.push(row); localStorage.setItem(LS_UNSENT, JSON.stringify(unsent)); $('sendState').textContent='전송 실패(보관)'; $('sendState').className='badge fail'; }
+  idx++; if(idx < TOTAL) renderCurrent(); else finish();
+}
+
+async function nextCompare(){
+  if($('btnCompareNext').classList.contains('disabled')) return;
+  const choice = $('btnCompareNext').dataset.choice || '';
+  const row = {
+    timestamp: new Date().toISOString(),
+    nickname: $('nickname').value.trim(),
+    track: $('track').value,
+    trial_index: idx+1,
+    item_id: 'disease_compare',
+    topic: '비교/전염병',
+    variant: choice,
+    title: choice==='A' ? COMPARE_ITEM.A.title : COMPARE_ITEM.B.title,
+    policy_prompt: '비교 라운드(더 불안한 기사 선택)',
+    anxiety_1to5: Number($('cmp_anxiety').value),
+    policy_attitude: choice,
+    rt_ms: 0
+  };
+  saved.push(row); localStorage.setItem(LS_KEY, JSON.stringify(saved));
+  $('sendState2').textContent='전송 중…';
+  try{ await postRows([row]); $('sendState2').textContent='전송 성공'; $('sendState2').className='badge ok'; }
+  catch(e){ unsent.push(row); localStorage.setItem(LS_UNSENT, JSON.stringify(unsent)); $('sendState2').textContent='전송 실패(보관)'; $('sendState2').className='badge fail'; }
+  idx++; if(idx < TOTAL) renderCurrent(); else finish();
+}
+
+function finish(){
+  $('screen-trial').classList.add('hidden');
+  $('screen-compare').classList.add('hidden');
+  $('screen-finish').classList.remove('hidden');
+  const last = saved.slice(-(TOTAL));
+  const avg = (arr)=> (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
+  const singles = last.filter(r=>r.item_id!=='disease_compare');
+  const fear = singles.filter(r=>r.variant==='fear');
+  const neu  = singles.filter(r=>r.variant==='neutral');
+  const fearAvg = fear.length?avg(fear.map(r=>r.anxiety_1to5)):'-';
+  const neuAvg  = neu.length?avg(neu.map(r=>r.anxiety_1to5)):'-';
+  const cmp = last.find(r=>r.item_id==='disease_compare');
+  const html = `
+    <table>
+      <tr><th>단일 라운드 평균 불안</th><td>${avg(singles.map(r=>r.anxiety_1to5))}</td></tr>
+      <tr><th>공포 프레임 평균</th><td>${fearAvg}</td></tr>
+      <tr><th>중립 프레임 평균</th><td>${neuAvg}</td></tr>
+      <tr><th>비교 라운드 선택(A/B)</th><td>${cmp ? cmp.policy_attitude : '-'}</td></tr>
+      <tr><th>표본 크기(단일)</th><td>${singles.length}</td></tr>
+    </table>
+    <p class="hint">CSV로 내보내면 라운드별 상세 데이터(제목, 변형, 불안도, 정책 태도)를 확인할 수 있어요.</p>
+  `;
+  $('summary').innerHTML = html;
+}
 </script>
 </body>
 </html>
