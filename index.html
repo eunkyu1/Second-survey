@@ -1,50 +1,125 @@
 <!doctype html>
+<html lang="ko">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Anxiety Lab 연결 테스트</title>
+<title>Anxiety Lab — 스프레드시트 연결 점검</title>
+<meta name="theme-color" content="#1f4aff">
 <style>
-body{font-family:system-ui,Apple SD Gothic Neo,Noto Sans KR,sans-serif;background:#0b1020;color:#e7ecff;margin:0}
-main{max-width:720px;margin:40px auto;padding:0 16px}
-.card{background:#111832;border:1px solid #243063;border-radius:14px;padding:18px}
-h1{margin:0 0 10px}
-.btn{padding:10px 14px;border-radius:10px;border:1px solid #1f4aff;background:#1f4aff;color:#fff;cursor:pointer}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #2a3567;background:#0e1633;color:#93a1c8;margin-left:8px}
-.badge.ok{color:#c9ffe0;border-color:#3bd671;background:#0f2a1d}
-.badge.err{color:#ffe1df;border-color:#ff6961;background:#2a1010}
-.small{color:#93a1c8}
+:root{--bg:#0b1020;--card:#111832;--muted:#93a1c8;--text:#e7ecff;--accent:#1f4aff;--ok:#3bd671;--fail:#ff6961}
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif}
+.container{max-width:860px;margin:36px auto;padding:0 18px}
+.card{background:linear-gradient(180deg,#101737,#0d1330);border:1px solid #243063;border-radius:16px;padding:22px;margin:18px 0}
+h1{margin:0 0 12px} .subtitle{color:var(--muted)} .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #2a3567;background:#0e1633;color:var(--muted);margin-left:8px}
+.badge.ok{color:#c9ffe0;border-color:var(--ok);background:#0f2a1d}
+.badge.err{color:#ffe1df;border-color:var(--fail);background:#2a1010}
+pre{white-space:pre-wrap;background:#0e1633;border:1px solid #243063;border-radius:12px;padding:12px;max-height:320px;overflow:auto}
+small{color:var(--muted)}
 </style>
-<main>
-  <div class="card">
-    <h1>스프레드시트 연결 테스트</h1>
-    <p class="small">버튼을 누르면 네 시트 <code>responses</code> 탭에 <b>PING</b> 한 줄이 기록돼.</p>
-    <button id="ping" class="btn">연결 테스트 보내기</button>
-    <span id="state" class="badge">대기</span>
-    <p class="small" style="margin-top:10px">연결되면 본 게임 파일을 올릴게. 안 되면 시트/앱스 스크립트 설정을 보자.</p>
-  </div>
-</main>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>스프레드시트 연결 점검</h1>
+      <p class="subtitle">아래 두 단계로 확인: ① 웹앱 헬스체크(GET) → ② PING 전송(POST)</p>
+      <div class="row">
+        <button id="btnHealth" class="btn">① 헬스체크(GET)</button>
+        <span id="healthState" class="badge">대기</span>
+      </div>
+      <div class="row">
+        <button id="btnPing" class="btn ghost">② PING 전송(POST)</button>
+        <span id="pingState" class="badge">대기</span>
+      </div>
+      <p style="margin-top:10px"><small>둘 다 성공하면 본 게임 HTML을 올리면 된다. 실패면 아래 결과를 참고해 Apps Script 설정을 점검하자.</small></p>
+    </section>
+
+    <section class="card">
+      <h2>응답 상세</h2>
+      <pre id="log">여기에 결과가 표시된다.</pre>
+    </section>
+  </main>
+
 <script>
-const ENDPOINT = "https://script.google.com/macros/s/AKfycbw0jb51hVWE_s2FzIvoFjKlKKiarl671jSgitSyHN_wtQQEFZvw5drCBiXgwZDNDRvD6g/exec";
-const state = document.getElementById('state');
-document.getElementById('ping').addEventListener('click', async ()=>{
-  state.textContent='전송 중…';
-  state.className='badge';
+// 엔드포인트(네가 준 새 주소)
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ5sSESrUxTEa5fV6RHlLm5pGapr0oRhdkH_cVYeGjDyhER0qtBOjSFdK-CG-SVmc6Yw/exec";
+
+const $ = (id)=>document.getElementById(id);
+const log = (msg, append=true)=>{
+  const box = $('log');
+  box.textContent = append ? (box.textContent + "\n" + msg) : msg;
+};
+
+async function healthcheck(){
+  $('healthState').textContent = '요청 중…';
+  $('healthState').className = 'badge';
+  log('--- 헬스체크(GET) 시작 ---\nURL: ' + ENDPOINT, false);
+  try{
+    const res = await fetch(ENDPOINT, { method: 'GET', cache: 'no-store' });
+    const text = await res.text();
+    log(`HTTP ${res.status}\n${text}`);
+    if(res.ok && /READY/i.test(text)){
+      $('healthState').textContent = '헬스체크 성공(READY)';
+      $('healthState').className = 'badge ok';
+    }else{
+      $('healthState').textContent = '헬스체크 실패';
+      $('healthState').className = 'badge err';
+    }
+  }catch(e){
+    $('healthState').textContent = '헬스체크 오류';
+    $('healthState').className = 'badge err';
+    log('에러: ' + (e.message || e));
+  }
+}
+
+async function sendPing(){
+  $('pingState').textContent = '전송 중…';
+  $('pingState').className = 'badge';
+  log('\n--- PING 전송(POST) 시작 ---\nURL: ' + ENDPOINT);
   const row = {
-    timestamp:new Date().toISOString(), nickname:'PING', track:'media',
-    trial_index:0, item_id:'ping', topic:'ping', variant:'ping',
-    title:'PING TEST', policy_prompt:'PING', anxiety_1to5:0, policy_attitude:'PING', rt_ms:0
+    timestamp: new Date().toISOString(),
+    nickname: 'PING',
+    track: 'media',
+    trial_index: 0,
+    item_id: 'ping',
+    topic: 'ping',
+    variant: 'ping',
+    title: 'PING TEST',
+    policy_prompt: 'PING',
+    anxiety_1to5: 0,
+    policy_attitude: 'PING',
+    rt_ms: 0
   };
   try{
     const res = await fetch(ENDPOINT, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token:'', rows:[row]})
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ token:'', rows:[row] })
     });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    state.textContent='연결 정상(PING 기록됨)';
-    state.className='badge ok';
+    const text = await res.text();
+    log(`HTTP ${res.status}\n${text}`);
+    if(res.ok && /OK|success/i.test(text)){
+      $('pingState').textContent = '연결 정상(PING 기록됨)';
+      $('pingState').className = 'badge ok';
+    }else{
+      $('pingState').textContent = '전송 실패(본문 확인)';
+      $('pingState').className = 'badge err';
+    }
   }catch(e){
-    state.textContent='연결 실패(설정 점검 필요)';
-    state.className='badge err';
-    console.error(e);
+    $('pingState').textContent = '전송 오류';
+    $('pingState').className = 'badge err';
+    log('에러: ' + (e.message || e));
   }
-});
+}
+
+$('btnHealth').addEventListener('click', healthcheck);
+$('btnPing').addEventListener('click', sendPing);
+
+// 페이지 진입 시 엔드포인트 문자열도 로그에 표시
+log('ENDPOINT = ' + ENDPOINT);
 </script>
+</body>
+</html>
