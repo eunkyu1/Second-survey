@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anxiety Lab 연결 테스트</title>
+<style>
+body{font-family:system-ui,Apple SD Gothic Neo,Noto Sans KR,sans-serif;background:#0b1020;color:#e7ecff;margin:0}
+main{max-width:720px;margin:40px auto;padding:0 16px}
+.card{background:#111832;border:1px solid #243063;border-radius:14px;padding:18px}
+h1{margin:0 0 10px}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid #1f4aff;background:#1f4aff;color:#fff;cursor:pointer}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #2a3567;background:#0e1633;color:#93a1c8;margin-left:8px}
+.badge.ok{color:#c9ffe0;border-color:#3bd671;background:#0f2a1d}
+.badge.err{color:#ffe1df;border-color:#ff6961;background:#2a1010}
+.small{color:#93a1c8}
+</style>
+<main>
+  <div class="card">
+    <h1>스프레드시트 연결 테스트</h1>
+    <p class="small">버튼을 누르면 네 시트 <code>responses</code> 탭에 <b>PING</b> 한 줄이 기록돼.</p>
+    <button id="ping" class="btn">연결 테스트 보내기</button>
+    <span id="state" class="badge">대기</span>
+    <p class="small" style="margin-top:10px">연결되면 본 게임 파일을 올릴게. 안 되면 시트/앱스 스크립트 설정을 보자.</p>
+  </div>
+</main>
+<script>
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbw0jb51hVWE_s2FzIvoFjKlKKiarl671jSgitSyHN_wtQQEFZvw5drCBiXgwZDNDRvD6g/exec";
+const state = document.getElementById('state');
+document.getElementById('ping').addEventListener('click', async ()=>{
+  state.textContent='전송 중…';
+  state.className='badge';
+  const row = {
+    timestamp:new Date().toISOString(), nickname:'PING', track:'media',
+    trial_index:0, item_id:'ping', topic:'ping', variant:'ping',
+    title:'PING TEST', policy_prompt:'PING', anxiety_1to5:0, policy_attitude:'PING', rt_ms:0
+  };
+  try{
+    const res = await fetch(ENDPOINT, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token:'', rows:[row]})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    state.textContent='연결 정상(PING 기록됨)';
+    state.className='badge ok';
+  }catch(e){
+    state.textContent='연결 실패(설정 점검 필요)';
+    state.className='badge err';
+    console.error(e);
+  }
+});
+</script>
